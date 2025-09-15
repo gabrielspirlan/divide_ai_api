@@ -90,6 +90,13 @@ mvn spring-boot:run
 | GET | `/event/analytics/click-history` | Últimos 5 cliques |
 | GET | `/event/analytics/page-view-history` | Últimas 5 page views |
 
+### Health Check
+
+| Método | Endpoint | Descrição |
+|--------|----------|-----------|
+| GET | `/health` | **Status da aplicação e banco de dados** |
+| GET | `/actuator/health` | Health check do Spring Boot Actuator |
+
 ### Exemplo de Uso
 
 **Criar evento:**
@@ -117,6 +124,26 @@ curl http://localhost:8080/event/analytics/stats
   "loadingTimeUnit": "milliseconds",
   "totalClicks": 25,
   "totalPageViews": 50
+}
+```
+
+**Verificar health check:**
+```bash
+curl http://localhost:8080/health
+```
+
+**Resposta:**
+```json
+{
+  "status": "UP",
+  "timestamp": "2025-09-15T19:30:00",
+  "application": "DivideAI API",
+  "version": "1.0.0",
+  "database": {
+    "status": "UP",
+    "type": "MongoDB",
+    "totalEvents": 25
+  }
 }
 ```
 
