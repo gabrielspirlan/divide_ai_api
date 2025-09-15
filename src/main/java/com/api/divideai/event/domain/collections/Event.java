@@ -19,7 +19,6 @@ public class Event {
     private EventType eventType;
     @NotBlank(message = "Página deve ser informada")
     private String page;
-    @NotBlank(message = "Loading deve ser informada")
     private Long loading;
 
     public String getId() {
