@@ -3,7 +3,10 @@ package com.api.divideai.event.application.services;
 import com.api.divideai.event.application.dto.AnalyticsStatsDto;
 import com.api.divideai.event.application.dto.AverageLoadingTimeDto;
 import com.api.divideai.event.application.dto.EventHistoryDto;
+import com.api.divideai.event.application.dto.MostAccessedPageDto;
+import com.api.divideai.event.application.dto.MostClickedElementDto;
 import com.api.divideai.event.application.dto.PagedEventResponseDto;
+import com.api.divideai.event.application.dto.SlowestLoadingItemDto;
 import com.api.divideai.event.application.dto.TotalCountDto;
 import com.api.divideai.event.domain.collections.Event;
 
@@ -35,4 +38,11 @@ public interface IEventService {
     EventHistoryDto getClickHistory();
 
     EventHistoryDto getPageViewHistory();
+
+    // Novos métodos para os endpoints solicitados
+    SlowestLoadingItemDto getSlowestLoadingItem();
+
+    MostClickedElementDto getMostClickedElement();
+
+    MostAccessedPageDto getMostAccessedPage();
 }

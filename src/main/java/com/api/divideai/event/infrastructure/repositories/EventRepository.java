@@ -28,4 +28,16 @@ public interface EventRepository extends MongoRepository<Event, String> {
     // Buscar todos os eventos de loading para calcular média
     @Query(value = "{ 'loading': { $exists: true, $ne: null } }", fields = "{ 'loading': 1 }")
     List<Event> findAllWithLoadingTime();
+
+    // Buscar o item que demorou mais tempo para carregar
+    @Query(value = "{ 'loading': { $exists: true, $ne: null } }")
+    List<Event> findAllWithLoadingTimeOrderByLoadingDesc();
+
+    // Buscar elementos mais clicados (agrupados por elementId)
+    @Query(value = "{ 'eventType': 'CLICK' }")
+    List<Event> findAllClickEvents();
+
+    // Buscar páginas mais acessadas (agrupados por page)
+    @Query(value = "{ 'eventType': 'PAGE_VIEW' }")
+    List<Event> findAllPageViewEvents();
 }

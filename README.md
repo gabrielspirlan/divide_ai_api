@@ -89,6 +89,9 @@ mvn spring-boot:run
 | GET | `/event/analytics/loading-history` | Últimos 5 eventos de loading |
 | GET | `/event/analytics/click-history` | Últimos 5 cliques |
 | GET | `/event/analytics/page-view-history` | Últimas 5 page views |
+| GET | `/event/analytics/slowest-loading-item` | **Item que demorou mais tempo para carregar** |
+| GET | `/event/analytics/most-clicked-element` | **Elemento mais clicado** |
+| GET | `/event/analytics/most-accessed-page` | **Página mais acessada** |
 
 ### Health Check
 
@@ -144,6 +147,51 @@ curl http://localhost:8080/health
     "type": "MongoDB",
     "totalEvents": 25
   }
+}
+```
+
+**Obter item que demorou mais tempo para carregar:**
+```bash
+curl http://localhost:8080/event/analytics/slowest-loading-item
+```
+
+**Resposta:**
+```json
+{
+  "elementId": "heavy-component",
+  "page": "/dashboard",
+  "variant": "B",
+  "loadingTime": 3500,
+  "loadingTimeUnit": "milliseconds"
+}
+```
+
+**Obter elemento mais clicado:**
+```bash
+curl http://localhost:8080/event/analytics/most-clicked-element
+```
+
+**Resposta:**
+```json
+{
+  "elementId": "button-signup",
+  "clickCount": 45,
+  "variant": "A",
+  "page": "/home"
+}
+```
+
+**Obter página mais acessada:**
+```bash
+curl http://localhost:8080/event/analytics/most-accessed-page
+```
+
+**Resposta:**
+```json
+{
+  "page": "/home",
+  "accessCount": 120,
+  "variant": "A"
 }
 ```
 

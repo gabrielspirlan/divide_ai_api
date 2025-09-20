@@ -3,7 +3,10 @@ package com.api.divideai.event.web.controller;
 import com.api.divideai.event.application.dto.AnalyticsStatsDto;
 import com.api.divideai.event.application.dto.AverageLoadingTimeDto;
 import com.api.divideai.event.application.dto.EventHistoryDto;
+import com.api.divideai.event.application.dto.MostAccessedPageDto;
+import com.api.divideai.event.application.dto.MostClickedElementDto;
 import com.api.divideai.event.application.dto.PagedEventResponseDto;
+import com.api.divideai.event.application.dto.SlowestLoadingItemDto;
 import com.api.divideai.event.application.dto.TotalCountDto;
 import com.api.divideai.event.application.services.EventService;
 import com.api.divideai.event.domain.collections.Event;
@@ -89,6 +92,26 @@ public class EventController {
     @GetMapping("/analytics/page-view-history")
     public ResponseEntity<EventHistoryDto> getPageViewHistory() {
         EventHistoryDto result = eventService.getPageViewHistory();
+        return new ResponseEntity<>(result, HttpStatus.OK);
+    }
+
+    // Novos endpoints solicitados
+
+    @GetMapping("/analytics/slowest-loading-item")
+    public ResponseEntity<SlowestLoadingItemDto> getSlowestLoadingItem() {
+        SlowestLoadingItemDto result = eventService.getSlowestLoadingItem();
+        return new ResponseEntity<>(result, HttpStatus.OK);
+    }
+
+    @GetMapping("/analytics/most-clicked-element")
+    public ResponseEntity<MostClickedElementDto> getMostClickedElement() {
+        MostClickedElementDto result = eventService.getMostClickedElement();
+        return new ResponseEntity<>(result, HttpStatus.OK);
+    }
+
+    @GetMapping("/analytics/most-accessed-page")
+    public ResponseEntity<MostAccessedPageDto> getMostAccessedPage() {
+        MostAccessedPageDto result = eventService.getMostAccessedPage();
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 }

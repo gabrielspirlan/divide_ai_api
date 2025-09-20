@@ -3,7 +3,10 @@ package com.api.divideai.event.application.services;
 import com.api.divideai.event.application.dto.AnalyticsStatsDto;
 import com.api.divideai.event.application.dto.AverageLoadingTimeDto;
 import com.api.divideai.event.application.dto.EventHistoryDto;
+import com.api.divideai.event.application.dto.MostAccessedPageDto;
+import com.api.divideai.event.application.dto.MostClickedElementDto;
 import com.api.divideai.event.application.dto.PagedEventResponseDto;
+import com.api.divideai.event.application.dto.SlowestLoadingItemDto;
 import com.api.divideai.event.application.dto.TotalCountDto;
 import com.api.divideai.event.domain.collections.Event;
 import com.api.divideai.event.domain.enums.EventType;
@@ -15,6 +18,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 @Service
 public class EventService implements IEventService {
 
@@ -125,5 +130,95 @@ public class EventService implements IEventService {
         Pageable pageable = PageRequest.of(0, 5);
         List<Event> recentPageViewEvents = eventRepository.findByEventTypeOrderByIdDesc(EventType.PAGE_VIEW, pageable);
         return new EventHistoryDto(EventType.PAGE_VIEW, recentPageViewEvents);
+    }
+
+    @Override
+    public SlowestLoadingItemDto getSlowestLoadingItem() {
+        List<Event> eventsWithLoading = eventRepository.findAllWithLoadingTimeOrderByLoadingDesc();
+
+        if (eventsWithLoading.isEmpty()) {
+            return new SlowestLoadingItemDto("N/A", "N/A", "N/A", 0L);
+        }
+
+        // Encontrar o evento com maior tempo de loading
+        Event slowestEvent = eventsWithLoading.stream()
+                .max((e1, e2) -> Long.compare(e1.getLoading(), e2.getLoading()))
+                .orElse(null);
+
+        if (slowestEvent == null) {
+            return new SlowestLoadingItemDto("N/A", "N/A", "N/A", 0L);
+        }
+
+        return new SlowestLoadingItemDto(
+                slowestEvent.getElementId(),
+                slowestEvent.getPage(),
+                slowestEvent.getVariant(),
+                slowestEvent.getLoading()
+        );
+    }
+
+    @Override
+    public MostClickedElementDto getMostClickedElement() {
+        List<Event> clickEvents = eventRepository.findAllClickEvents();
+
+        if (clickEvents.isEmpty()) {
+            return new MostClickedElementDto("N/A", 0L, "N/A", "N/A");
+        }
+
+        // Agrupar por elementId e contar
+        Map<String, List<Event>> groupedByElement = clickEvents.stream()
+                .collect(Collectors.groupingBy(Event::getElementId));
+
+        // Encontrar o elemento com mais cliques
+        String mostClickedElementId = groupedByElement.entrySet().stream()
+                .max(Map.Entry.comparingByValue((list1, list2) -> Integer.compare(list1.size(), list2.size())))
+                .map(Map.Entry::getKey)
+                .orElse("N/A");
+
+        if ("N/A".equals(mostClickedElementId)) {
+            return new MostClickedElementDto("N/A", 0L, "N/A", "N/A");
+        }
+
+        List<Event> mostClickedEvents = groupedByElement.get(mostClickedElementId);
+        Event sampleEvent = mostClickedEvents.get(0);
+
+        return new MostClickedElementDto(
+                mostClickedElementId,
+                (long) mostClickedEvents.size(),
+                sampleEvent.getVariant(),
+                sampleEvent.getPage()
+        );
+    }
+
+    @Override
+    public MostAccessedPageDto getMostAccessedPage() {
+        List<Event> pageViewEvents = eventRepository.findAllPageViewEvents();
+
+        if (pageViewEvents.isEmpty()) {
+            return new MostAccessedPageDto("N/A", 0L, "N/A");
+        }
+
+        // Agrupar por página e contar
+        Map<String, List<Event>> groupedByPage = pageViewEvents.stream()
+                .collect(Collectors.groupingBy(Event::getPage));
+
+        // Encontrar a página com mais acessos
+        String mostAccessedPage = groupedByPage.entrySet().stream()
+                .max(Map.Entry.comparingByValue((list1, list2) -> Integer.compare(list1.size(), list2.size())))
+                .map(Map.Entry::getKey)
+                .orElse("N/A");
+
+        if ("N/A".equals(mostAccessedPage)) {
+            return new MostAccessedPageDto("N/A", 0L, "N/A");
+        }
+
+        List<Event> mostAccessedEvents = groupedByPage.get(mostAccessedPage);
+        Event sampleEvent = mostAccessedEvents.get(0);
+
+        return new MostAccessedPageDto(
+                mostAccessedPage,
+                (long) mostAccessedEvents.size(),
+                sampleEvent.getVariant()
+        );
     }
 }
