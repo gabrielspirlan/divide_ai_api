@@ -18,8 +18,8 @@ public interface EventRepository extends MongoRepository<Event, String> {
     // Contar eventos por tipo
     Long countByEventType(EventType eventType);
 
-    // Buscar últimos eventos por tipo (ordenados por ID decrescente como proxy para data)
-    List<Event> findByEventTypeOrderByIdDesc(EventType eventType, Pageable pageable);
+    // Buscar últimos eventos por tipo (ordenados por data de criação decrescente)
+    List<Event> findByEventTypeOrderByCreatedAtDesc(EventType eventType, Pageable pageable);
 
     // Calcular média de loading time usando agregação
     @Query(value = "{ 'eventType': ?0 }", fields = "{ 'loading': 1 }")

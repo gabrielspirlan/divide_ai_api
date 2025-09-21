@@ -86,9 +86,9 @@ mvn spring-boot:run
 | GET | `/event/analytics/average-loading-time` | Tempo médio de loading |
 | GET | `/event/analytics/total-clicks` | Total de cliques |
 | GET | `/event/analytics/total-page-views` | Total de page views |
-| GET | `/event/analytics/loading-history` | Últimos 5 eventos de loading |
-| GET | `/event/analytics/click-history` | Últimos 5 cliques |
-| GET | `/event/analytics/page-view-history` | Últimas 5 page views |
+| GET | `/event/analytics/loading-history` | Últimos 5 eventos de loading (ordenados por data) |
+| GET | `/event/analytics/click-history` | Últimos 5 cliques (ordenados por data) |
+| GET | `/event/analytics/page-view-history` | Últimas 5 page views (ordenados por data) |
 | GET | `/event/analytics/slowest-loading-item` | **Item que demorou mais tempo para carregar** |
 | GET | `/event/analytics/most-clicked-element` | **Elemento mais clicado** |
 | GET | `/event/analytics/most-accessed-page` | **Página mais acessada** |
@@ -113,6 +113,19 @@ curl -X POST http://localhost:8080/event \
     "page": "/signup",
     "loading": 150
   }'
+```
+
+**Resposta da criação:**
+```json
+{
+  "id": "64f8a1b2c3d4e5f6a7b8c9d0",
+  "elementId": "button-signup",
+  "variant": "A",
+  "eventType": "CLICK",
+  "page": "/signup",
+  "loading": 150,
+  "createdAt": "2025-09-21T10:30:00.123"
+}
 ```
 
 **Obter estatísticas consolidadas:**
@@ -226,9 +239,19 @@ docker-compose exec divideai-api mvn test
   "variant": "A|B",
   "eventType": "CLICK|PAGE_VIEW|LOADING",
   "page": "string",
-  "loading": "number (milliseconds)"
+  "loading": "number (milliseconds)",
+  "createdAt": "2025-09-21T10:30:00"
 }
 ```
+
+**Campos:**
+- `id`: Identificador único do evento (gerado automaticamente)
+- `elementId`: ID do elemento que foi acionado
+- `variant`: Variação do teste A/B (A ou B)
+- `eventType`: Tipo do evento (CLICK, PAGE_VIEW ou LOADING)
+- `page`: Página onde o evento ocorreu
+- `loading`: Tempo de carregamento em millisegundos (opcional)
+- `createdAt`: Data e hora de criação do evento (definida automaticamente pelo backend)
 
 ### EventType (Enum)
 - `CLICK` - Evento de clique

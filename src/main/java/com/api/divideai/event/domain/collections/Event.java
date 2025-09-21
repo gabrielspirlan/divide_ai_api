@@ -6,6 +6,8 @@ import jakarta.validation.constraints.NotBlank;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.time.LocalDateTime;
+
 @Document(collection = "event")
 public class Event {
 
@@ -20,6 +22,7 @@ public class Event {
     @NotBlank(message = "Página deve ser informada")
     private String page;
     private Long loading;
+    private LocalDateTime createdAt;
 
     public String getId() {
         return id;
@@ -67,5 +70,13 @@ public class Event {
 
     public void setLoading(Long loading) {
         this.loading = loading;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
     }
 }

@@ -17,6 +17,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -52,6 +53,7 @@ public class EventService implements IEventService {
     @Override
     public Event create(Event event) {
         event.setId(null);
+        event.setCreatedAt(LocalDateTime.now());
         return eventRepository.save(event);
     }
 
@@ -114,21 +116,21 @@ public class EventService implements IEventService {
     @Override
     public EventHistoryDto getLoadingHistory() {
         Pageable pageable = PageRequest.of(0, 5);
-        List<Event> recentLoadingEvents = eventRepository.findByEventTypeOrderByIdDesc(EventType.LOADING, pageable);
+        List<Event> recentLoadingEvents = eventRepository.findByEventTypeOrderByCreatedAtDesc(EventType.LOADING, pageable);
         return new EventHistoryDto(EventType.LOADING, recentLoadingEvents);
     }
 
     @Override
     public EventHistoryDto getClickHistory() {
         Pageable pageable = PageRequest.of(0, 5);
-        List<Event> recentClickEvents = eventRepository.findByEventTypeOrderByIdDesc(EventType.CLICK, pageable);
+        List<Event> recentClickEvents = eventRepository.findByEventTypeOrderByCreatedAtDesc(EventType.CLICK, pageable);
         return new EventHistoryDto(EventType.CLICK, recentClickEvents);
     }
 
     @Override
     public EventHistoryDto getPageViewHistory() {
         Pageable pageable = PageRequest.of(0, 5);
-        List<Event> recentPageViewEvents = eventRepository.findByEventTypeOrderByIdDesc(EventType.PAGE_VIEW, pageable);
+        List<Event> recentPageViewEvents = eventRepository.findByEventTypeOrderByCreatedAtDesc(EventType.PAGE_VIEW, pageable);
         return new EventHistoryDto(EventType.PAGE_VIEW, recentPageViewEvents);
     }
 
