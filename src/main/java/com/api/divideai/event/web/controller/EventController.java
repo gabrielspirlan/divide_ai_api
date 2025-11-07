@@ -8,7 +8,7 @@ import com.api.divideai.event.application.dto.MostClickedElementDto;
 import com.api.divideai.event.application.dto.PagedEventResponseDto;
 import com.api.divideai.event.application.dto.SlowestLoadingItemDto;
 import com.api.divideai.event.application.dto.TotalCountDto;
-import com.api.divideai.event.application.services.EventService;
+import com.api.divideai.event.application.services.event.EventService;
 import com.api.divideai.event.domain.collections.Event;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

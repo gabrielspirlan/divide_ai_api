@@ -1,4 +1,4 @@
-package com.api.divideai.event.application.services;
+package com.api.divideai.event.application.services.event;
 
 import com.api.divideai.event.application.dto.AnalyticsStatsDto;
 import com.api.divideai.event.application.dto.AverageLoadingTimeDto;
