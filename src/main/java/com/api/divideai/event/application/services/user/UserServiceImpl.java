@@ -4,6 +4,7 @@ import com.api.divideai.event.application.dto.PageDTO;
 import com.api.divideai.event.domain.collections.User;
 import com.api.divideai.event.domain.dtos.user.UserRequestDTO;
 import com.api.divideai.event.domain.dtos.user.UserResponseDTO;
+import com.api.divideai.event.exceptions.DuplicateEmailException;
 import com.api.divideai.event.infrastructure.repositories.UserRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import javax.swing.*;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -45,6 +47,11 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserResponseDTO create(UserRequestDTO createDTO) {
+
+        Optional<User> existingUser = userRepository.findByEmail(createDTO.getEmail());
+        if (existingUser.isPresent()) {
+            throw new DuplicateEmailException("Usuário já cadastrado com este email");
+        }
 
         String encodedPassword = passwordEncoder.encode(createDTO.getPassword());
         createDTO.setPassword(encodedPassword);
