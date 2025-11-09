@@ -4,12 +4,14 @@ import com.api.divideai.event.application.dto.PageDTO;
 import com.api.divideai.event.domain.collections.Transaction;
 import com.api.divideai.event.domain.dtos.transaction.TransactionRequestDTO;
 import com.api.divideai.event.domain.dtos.transaction.TransactionResponseDTO;
+import com.api.divideai.event.domain.dtos.transaction.UserTransactionTotalsResponseDTO;
 import com.api.divideai.event.infrastructure.repositories.TransactionRepository;
 import com.api.divideai.event.infrastructure.repositories.UserRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -67,6 +69,44 @@ public class TransactionServiceImpl implements TransactionService {
                 .toList();
 
         return new PageImpl<TransactionResponseDTO>(dtoTransactions, pageDTO.mapPage(), transactions.getTotalElements());
+    }
+
+    @Override
+    public UserTransactionTotalsResponseDTO getUserTransactionTotals(String userId) {
+        // Verificar se o usuário existe
+        userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Usuário com o id: " + userId + " não existe"));
+
+        // Buscar todas as transações onde o usuário participa
+        Page<Transaction> transactionsPage = transactionRepository.findByParticipantsContaining(userId, Pageable.unpaged());
+        List<Transaction> transactions = transactionsPage.getContent();
+
+        double totalExpenses = 0.0;
+        double individualExpenses = 0.0;
+        double sharedExpenses = 0.0;
+
+        for (Transaction transaction : transactions) {
+            double value = transaction.getValue() != null ? transaction.getValue() : 0.0;
+
+            // Se tem mais de um participante, é compartilhado
+            if (transaction.getParticipants() != null && transaction.getParticipants().size() > 1) {
+                // Calcular o valor que o usuário pagou (valor dividido pelo número de participantes)
+                double valuePerPerson = value / transaction.getParticipants().size();
+                sharedExpenses += valuePerPerson;
+                totalExpenses += valuePerPerson;
+            } else {
+                // Gasto individual
+                individualExpenses += value;
+                totalExpenses += value;
+            }
+        }
+
+        // Arredondar valores para 2 casas decimais
+        totalExpenses = roundToTwoDecimals(totalExpenses);
+        individualExpenses = roundToTwoDecimals(individualExpenses);
+        sharedExpenses = roundToTwoDecimals(sharedExpenses);
+
+        return new UserTransactionTotalsResponseDTO(totalExpenses, individualExpenses, sharedExpenses);
     }
 
     @Override
@@ -152,5 +192,10 @@ public class TransactionServiceImpl implements TransactionService {
         BigDecimal participants = BigDecimal.valueOf(numberOfParticipants);
 
         return value.divide(participants, 2, RoundingMode.HALF_UP).doubleValue();
+    }
+
+    private double roundToTwoDecimals(double value) {
+        BigDecimal bd = BigDecimal.valueOf(value);
+        return bd.setScale(2, RoundingMode.HALF_UP).doubleValue();
     }
 }

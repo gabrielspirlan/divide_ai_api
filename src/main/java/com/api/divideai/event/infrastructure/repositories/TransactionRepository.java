@@ -18,4 +18,7 @@ public interface TransactionRepository extends MongoRepository<Transaction, Stri
 
     // Buscar transações por ID do grupo
     Page<Transaction> findByGroup(String groupId, Pageable pageable);
+
+    // Buscar transações onde o usuário está na lista de participantes
+    Page<Transaction> findByParticipantsContaining(String userId, Pageable pageable);
 }

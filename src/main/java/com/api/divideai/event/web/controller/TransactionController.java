@@ -4,6 +4,7 @@ import com.api.divideai.event.application.dto.PageDTO;
 import com.api.divideai.event.application.services.transaction.TransactionService;
 import com.api.divideai.event.domain.dtos.transaction.TransactionRequestDTO;
 import com.api.divideai.event.domain.dtos.transaction.TransactionResponseDTO;
+import com.api.divideai.event.domain.dtos.transaction.UserTransactionTotalsResponseDTO;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -32,6 +33,14 @@ public class TransactionController {
             @ParameterObject PageDTO pageDTO) {
         return new ResponseEntity<>(
                 transactionService.findByGroupId(groupId, pageDTO),
+                HttpStatus.OK
+        );
+    }
+
+    @GetMapping("/user/{userId}/totals")
+    public ResponseEntity<UserTransactionTotalsResponseDTO> getUserTransactionTotals(@PathVariable String userId) {
+        return new ResponseEntity<>(
+                transactionService.getUserTransactionTotals(userId),
                 HttpStatus.OK
         );
     }
