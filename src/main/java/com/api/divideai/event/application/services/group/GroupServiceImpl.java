@@ -8,6 +8,8 @@ import com.api.divideai.event.domain.dtos.group.GroupBillResponseDTO;
 import com.api.divideai.event.domain.dtos.group.GroupRequestDTO;
 import com.api.divideai.event.domain.dtos.group.GroupResponseDTO;
 import com.api.divideai.event.domain.dtos.group.GroupTotalsResponseDTO;
+import com.api.divideai.event.domain.dtos.group.GroupUserDTO;
+import com.api.divideai.event.domain.dtos.group.GroupUsersResponseDTO;
 import com.api.divideai.event.domain.dtos.group.UserBillDTO;
 import com.api.divideai.event.infrastructure.repositories.GroupRepository;
 import com.api.divideai.event.infrastructure.repositories.TransactionRepository;
@@ -186,6 +188,37 @@ public class GroupServiceImpl implements GroupService {
                 roundToTwoDecimals(totalIndividualExpenses),
                 roundToTwoDecimals(totalSharedExpenses),
                 userBills
+        );
+    }
+
+    @Override
+    public GroupUsersResponseDTO getGroupUsers(String groupId) {
+        // Verificar se o grupo existe
+        Group group = groupRepository.findById(groupId)
+                .orElseThrow(() -> new RuntimeException("Grupo com o id: " + groupId + " não existe"));
+
+        // Buscar informações de cada participante
+        List<GroupUserDTO> users = new ArrayList<>();
+
+        if (group.getParticipants() != null && !group.getParticipants().isEmpty()) {
+            for (String participantId : group.getParticipants()) {
+                User user = userRepository.findById(participantId).orElse(null);
+
+                if (user != null) {
+                    GroupUserDTO userDTO = new GroupUserDTO(
+                            user.getId(),
+                            user.getName(),
+                            user.getEmail()
+                    );
+                    users.add(userDTO);
+                }
+            }
+        }
+
+        return new GroupUsersResponseDTO(
+                group.getId(),
+                group.getName(),
+                users
         );
     }
 

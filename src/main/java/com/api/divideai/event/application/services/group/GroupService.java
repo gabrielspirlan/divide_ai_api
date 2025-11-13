@@ -5,6 +5,7 @@ import com.api.divideai.event.domain.dtos.group.GroupBillResponseDTO;
 import com.api.divideai.event.domain.dtos.group.GroupRequestDTO;
 import com.api.divideai.event.domain.dtos.group.GroupResponseDTO;
 import com.api.divideai.event.domain.dtos.group.GroupTotalsResponseDTO;
+import com.api.divideai.event.domain.dtos.group.GroupUsersResponseDTO;
 import org.springframework.data.domain.Page;
 
 public interface GroupService {
@@ -18,6 +19,8 @@ public interface GroupService {
     GroupTotalsResponseDTO getGroupTotals(String groupId);
 
     GroupBillResponseDTO getGroupBill(String groupId);
+
+    GroupUsersResponseDTO getGroupUsers(String groupId);
 
     GroupResponseDTO create(GroupRequestDTO createDTO);
 

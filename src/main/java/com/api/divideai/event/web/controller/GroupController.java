@@ -6,6 +6,7 @@ import com.api.divideai.event.domain.dtos.group.GroupBillResponseDTO;
 import com.api.divideai.event.domain.dtos.group.GroupRequestDTO;
 import com.api.divideai.event.domain.dtos.group.GroupResponseDTO;
 import com.api.divideai.event.domain.dtos.group.GroupTotalsResponseDTO;
+import com.api.divideai.event.domain.dtos.group.GroupUsersResponseDTO;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -58,6 +59,14 @@ public class GroupController {
     public ResponseEntity<GroupBillResponseDTO> getGroupBill(@PathVariable String id) {
         return new ResponseEntity<>(
                 groupService.getGroupBill(id),
+                HttpStatus.OK
+        );
+    }
+
+    @GetMapping("/{id}/users")
+    public ResponseEntity<GroupUsersResponseDTO> getGroupUsers(@PathVariable String id) {
+        return new ResponseEntity<>(
+                groupService.getGroupUsers(id),
                 HttpStatus.OK
         );
     }
