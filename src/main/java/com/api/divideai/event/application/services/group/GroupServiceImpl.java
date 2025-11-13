@@ -3,9 +3,12 @@ package com.api.divideai.event.application.services.group;
 import com.api.divideai.event.application.dto.PageDTO;
 import com.api.divideai.event.domain.collections.Group;
 import com.api.divideai.event.domain.collections.Transaction;
+import com.api.divideai.event.domain.collections.User;
+import com.api.divideai.event.domain.dtos.group.GroupBillResponseDTO;
 import com.api.divideai.event.domain.dtos.group.GroupRequestDTO;
 import com.api.divideai.event.domain.dtos.group.GroupResponseDTO;
 import com.api.divideai.event.domain.dtos.group.GroupTotalsResponseDTO;
+import com.api.divideai.event.domain.dtos.group.UserBillDTO;
 import com.api.divideai.event.infrastructure.repositories.GroupRepository;
 import com.api.divideai.event.infrastructure.repositories.TransactionRepository;
 import com.api.divideai.event.infrastructure.repositories.UserRepository;
@@ -18,7 +21,10 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class GroupServiceImpl implements GroupService {
@@ -103,6 +109,87 @@ public class GroupServiceImpl implements GroupService {
     }
 
     @Override
+    public GroupBillResponseDTO getGroupBill(String groupId) {
+        // Verificar se o grupo existe
+        Group group = groupRepository.findById(groupId)
+                .orElseThrow(() -> new RuntimeException("Grupo com o id: " + groupId + " não existe"));
+
+        // Buscar todas as transações do grupo
+        Page<Transaction> transactionsPage = transactionRepository.findByGroup(groupId, Pageable.unpaged());
+        List<Transaction> transactions = transactionsPage.getContent();
+
+        // Mapa para armazenar as despesas de cada usuário
+        Map<String, UserBillData> userBillDataMap = new HashMap<>();
+
+        // Inicializar dados para cada participante do grupo
+        for (String participantId : group.getParticipants()) {
+            User user = userRepository.findById(participantId)
+                    .orElse(null);
+            String userName = user != null ? user.getName() : "Usuário não encontrado";
+            userBillDataMap.put(participantId, new UserBillData(participantId, userName));
+        }
+
+        double totalExpenses = 0.0;
+        double totalIndividualExpenses = 0.0;
+        double totalSharedExpenses = 0.0;
+
+        // Processar cada transação
+        for (Transaction transaction : transactions) {
+            double value = transaction.getValue() != null ? transaction.getValue() : 0.0;
+            totalExpenses += value;
+
+            List<String> participants = transaction.getParticipants();
+
+            if (participants != null && !participants.isEmpty()) {
+                // Se tem mais de um participante, é compartilhado
+                if (participants.size() > 1) {
+                    totalSharedExpenses += value;
+                    // Dividir o valor igualmente entre os participantes
+                    double sharedPerPerson = value / participants.size();
+
+                    for (String participantId : participants) {
+                        UserBillData billData = userBillDataMap.get(participantId);
+                        if (billData != null) {
+                            billData.addSharedExpense(sharedPerPerson);
+                        }
+                    }
+                } else {
+                    // Despesa individual
+                    totalIndividualExpenses += value;
+                    String participantId = participants.get(0);
+                    UserBillData billData = userBillDataMap.get(participantId);
+                    if (billData != null) {
+                        billData.addIndividualExpense(value);
+                    }
+                }
+            }
+        }
+
+        // Criar lista de UserBillDTO
+        List<UserBillDTO> userBills = new ArrayList<>();
+        for (UserBillData billData : userBillDataMap.values()) {
+            UserBillDTO userBill = new UserBillDTO(
+                    billData.userId,
+                    billData.userName,
+                    roundToTwoDecimals(billData.individualExpenses),
+                    roundToTwoDecimals(billData.sharedExpenses),
+                    roundToTwoDecimals(billData.individualExpenses + billData.sharedExpenses)
+            );
+            userBills.add(userBill);
+        }
+
+        // Criar e retornar o DTO de resposta
+        return new GroupBillResponseDTO(
+                group.getId(),
+                group.getName(),
+                roundToTwoDecimals(totalExpenses),
+                roundToTwoDecimals(totalIndividualExpenses),
+                roundToTwoDecimals(totalSharedExpenses),
+                userBills
+        );
+    }
+
+    @Override
     public GroupResponseDTO create(GroupRequestDTO createDTO) {
         Group group = groupRepository.save(mapper.map(createDTO, Group.class));
         return mapAndSetTotalValue(group);
@@ -165,5 +252,28 @@ public class GroupServiceImpl implements GroupService {
     private double roundToTwoDecimals(double value) {
         BigDecimal bd = BigDecimal.valueOf(value);
         return bd.setScale(2, RoundingMode.HALF_UP).doubleValue();
+    }
+
+    // Classe auxiliar para armazenar dados temporários da bill de cada usuário
+    private static class UserBillData {
+        String userId;
+        String userName;
+        double individualExpenses;
+        double sharedExpenses;
+
+        UserBillData(String userId, String userName) {
+            this.userId = userId;
+            this.userName = userName;
+            this.individualExpenses = 0.0;
+            this.sharedExpenses = 0.0;
+        }
+
+        void addIndividualExpense(double amount) {
+            this.individualExpenses += amount;
+        }
+
+        void addSharedExpense(double amount) {
+            this.sharedExpenses += amount;
+        }
     }
 }

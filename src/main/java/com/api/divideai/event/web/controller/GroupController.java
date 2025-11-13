@@ -2,6 +2,7 @@ package com.api.divideai.event.web.controller;
 
 import com.api.divideai.event.application.dto.PageDTO;
 import com.api.divideai.event.application.services.group.GroupService;
+import com.api.divideai.event.domain.dtos.group.GroupBillResponseDTO;
 import com.api.divideai.event.domain.dtos.group.GroupRequestDTO;
 import com.api.divideai.event.domain.dtos.group.GroupResponseDTO;
 import com.api.divideai.event.domain.dtos.group.GroupTotalsResponseDTO;
@@ -49,6 +50,14 @@ public class GroupController {
     public ResponseEntity<GroupTotalsResponseDTO> getGroupTotals(@PathVariable String id) {
         return new ResponseEntity<>(
                 groupService.getGroupTotals(id),
+                HttpStatus.OK
+        );
+    }
+
+    @GetMapping("/{id}/bill")
+    public ResponseEntity<GroupBillResponseDTO> getGroupBill(@PathVariable String id) {
+        return new ResponseEntity<>(
+                groupService.getGroupBill(id),
                 HttpStatus.OK
         );
     }
