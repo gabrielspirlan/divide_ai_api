@@ -257,6 +257,11 @@ public class GroupServiceImpl implements GroupService {
     @Override
     public void delete(String id) {
         Group group = groupRepository.findById(id).orElseThrow(() -> new RuntimeException("Grupo com o id: " + id + "não existe"));
+
+        // Deletar todas as transações vinculadas ao grupo
+        transactionRepository.deleteByGroup(id);
+
+        // Deletar o grupo
         groupRepository.delete(group);
     }
 

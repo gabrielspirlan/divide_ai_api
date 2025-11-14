@@ -21,4 +21,7 @@ public interface TransactionRepository extends MongoRepository<Transaction, Stri
 
     // Buscar transações onde o usuário está na lista de participantes
     Page<Transaction> findByParticipantsContaining(String userId, Pageable pageable);
+
+    // Deletar todas as transações de um grupo
+    void deleteByGroup(String groupId);
 }
